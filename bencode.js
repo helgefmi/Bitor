@@ -2,12 +2,6 @@ var sys = require('sys'),
     assert = require('assert'),
     Buffer = require('buffer').Buffer;
 
-exports.encode_integer = encode_integer;
-exports.encode_string = encode_string;
-exports.encode_list = encode_list;
-exports.encode_dict = encode_dict;
-exports.encode = encode;
-
 function encode(obj) {
     if (typeof(obj) == "number")
         return encode_integer(obj);
@@ -30,10 +24,10 @@ function encode_string(str) {
         return '0:';
 
     /* Using Buffer so we can be sure that the length is the length of the actual bytes, and not number of letters. */
-    return (new Buffer(str)).length + ':' + str;
+    return (new Buffer(str, 'binary')).length + ':' + str;
 }
 function encode_list(list) {
-    return 'l' + list.map(exports.encode).join('') + 'e';
+    return 'l' + list.map(encode).join('') + 'e';
 }
 function encode_dict(dict) {
     var keys = [];
@@ -43,7 +37,7 @@ function encode_dict(dict) {
     keys.sort();
 
     return 'd' + keys.map(function(key) {
-        return encode_string('' + key) + exports.encode(dict[key]);
+        return encode_string('' + key) + encode(dict[key]);
     }).join('') + 'e';
 }
 
@@ -53,7 +47,8 @@ function encode_dict(dict) {
         {input: 'hei', output: '3:hei'},
         {input: '', output: '0:'},
         {input: 'aB cD eF gH', output: '11:aB cD eF gH'},
-        {input: 'Mitt navn har \u00e6 og \u00f8 og \u00e5 i seg!', output: '35:Mitt navn har \u00e6 og \u00f8 og \u00e5 i seg!'},
+        {input: 'Mitt navn har \u00e6 og \u00f8 og \u00e5 i seg!', output: '32:Mitt navn har \u00e6 og \u00f8 og \u00e5 i seg!'},
+        {input: {interval: 60, leechers: 1, peers: 'PÕ]cáà', seeders: 0}, output: 'd8:intervali60e8:leechersi1e5:peers6:PÕ]cáà7:seedersi0ee'},
 
         {input: 42, output: 'i42e'},
         {input: -42, output: 'i-42e'},
@@ -73,3 +68,9 @@ function encode_dict(dict) {
         assert.strictEqual(encode(tests[i].input), tests[i].output);
     }
 })();
+
+exports.encode_integer = encode_integer;
+exports.encode_string = encode_string;
+exports.encode_list = encode_list;
+exports.encode_dict = encode_dict;
+exports.encode = encode;
