@@ -224,7 +224,7 @@ var Bitor = (function() {
                     debug(msg);
                     var response = bencode.encode({'failure': msg, 'failure code': errno});
                     res.writeHead(200, {'Content-Type': 'text/plain',
-                                        'Content-Length': (new Buffer(response)).length});
+                                        'Content-Length': (new Buffer(response, 'binary')).length});
                     res.write(response);
                     res.end();
                 }
